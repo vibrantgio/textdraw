@@ -1,4 +1,4 @@
-module github.com/vibrantgio/text
+module github.com/vibrantgio/textdraw
 
 go 1.24.1
 
@@ -8,7 +8,9 @@ require (
 )
 
 require (
-	github.com/go-text/typesetting v0.0.0-20230602202114-9797aefac433 // indirect
-	golang.org/x/exp v0.0.0-20221012211006-4de253d81b95 // indirect
+	gioui.org/cpu v0.0.0-20220412190645-f1e9e8c3b1f7 // indirect
+	github.com/go-text/typesetting v0.0.0-20230717141307-09c70c30a055 // indirect
+	golang.org/x/exp v0.0.0-20230801115018-d63ba01acd4b // indirect
+	golang.org/x/sys v0.10.0 // indirect
 	golang.org/x/text v0.11.0 // indirect
 )

@@ -1,4 +1,4 @@
-package text
+package textdraw
 
 import (
 	"gioui.org/font"
