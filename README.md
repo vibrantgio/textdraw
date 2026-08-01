@@ -1,6 +1,6 @@
 # textdraw
 
-Text measurement and drawing for [VibrantGio](https://github.com/vibrantgio),
+Text measurement and drawing for [Vibrant Gio](https://github.com/vibrantgio),
 a design system for native desktop applications on macOS, Windows and Linux,
 written in pure Go on [Gio](https://gioui.org) — one level below the widget
 layer, straight onto a `*text.Shaper`.
