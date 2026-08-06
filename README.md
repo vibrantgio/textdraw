@@ -23,10 +23,14 @@ went. `Text` and `Label` wrap the same code as `layout.Widget`s for the cases
 where you do want a widget.
 
 The styling parameter is `TextStyle`: font, alignment, size in `unit.Sp`, line
-limit, truncator and wrap policy. It is deliberately the same struct
-[style](https://github.com/vibrantgio/style)'s type scale is a table of, so
-`textdraw.FillText(gtx, shaper, style.H6, …)` is the normal call and neither
-module has to know about the other's contents.
+limit, truncator and wrap policy. Where the values come from has two eras. The
+frozen [style](https://github.com/vibrantgio/style) module is a table of them,
+and the support repositories' example programs still draw with
+`textdraw.FillText(gtx, shaper, style.H6, …)`. The workbench applications
+instead derive theirs from the theme: a small per-app conversion turns a
+`spectrum/tokens.TextStyle` role into a `textdraw.TextStyle` (see
+`todos/theme.go`), so the typeface and sizes arrive through the theme and this
+module still only ever sees the struct it defines.
 
 ## Where it sits
 
@@ -37,18 +41,22 @@ a leaf that imports only Gio and `golang.org/x/image`. The
 Nothing inside the design system imports it: prism, pulse, cadence and markdown
 draw their own text through Gio's widget layer.
 [style](https://github.com/vibrantgio/style) imports it for its `TextStyle`
-table, and the callers are applications — thirteen demo mains under
+table, and the callers are applications — a dozen example mains under
 `mvu/example`, `ivg/raster/gio/example`, `svg/driver/gio/example` and
 `traer/gio`, plus three of the seven
 [workbench](https://github.com/vibrantgio/workbench) applications: `todos`,
 `iconbrowser` and `mindchat`.
 
-**This module is not deprecated.** ADR-003 freezes `style` and says nothing
-about textdraw, no task in Phase C touches it, and `MeasureText`, `FillText`
-and `FillLabel` have no replacement anywhere in the design system — there is
-nothing else in the organization that measures a string or paints one into a
-rectangle you chose. Read the Status section as a warning against *new*
-dependencies on `TextStyle` specifically, not as a removal notice.
+**This module is not deprecated, and the fate of `style` does not touch it.**
+ADR-003 froze `style` — F3.4 of the
+[org plan](https://github.com/vibrantgio/.github) (planned) archives that
+repository at v0.0.6 — but says nothing about textdraw, which stays a live
+tier-0 module: no phase deprecates it, no phase deletes it, and `MeasureText`,
+`FillText` and `FillLabel` have no replacement anywhere in the design system —
+there is nothing else in the organization that measures a string or paints one
+into a rectangle you chose. The workbench applications kept drawing through it
+when F1 moved them off `style`; only the source of their `TextStyle` values
+changed, from `style`'s table to the theme's Typography roles.
 
 ```sh
 go get github.com/vibrantgio/textdraw
@@ -76,13 +84,14 @@ One package, at the module root.
 
 Measure, then place, then draw. This is `list.go` from
 [workbench/todos](https://github.com/vibrantgio/workbench/tree/master/todos),
-sizing a clickable row to one line of `H6` and vertically centring the item's
-text in it:
+sizing a clickable row to one line of its Title style — the theme's TitleLarge
+role converted to a `textdraw.TextStyle`, with the theme's cached shaper —
+and vertically centring the item's text in it:
 
 ```go
-h := textdraw.MeasureText(gtx, shaper, H6, "W").Y
+h := textdraw.MeasureText(gtx, typ.Shaper, typ.Title, "W").Y
 size := image.Pt(gtx.Constraints.Max.X, h+gtx.Dp(Padding))
-textdraw.FillText(gtx, shaper, H6, image.Rectangle{Max: size}, 0.0, 0.5, textColor, item.Text)
+textdraw.FillText(gtx, typ.Shaper, typ.Title, image.Rectangle{Max: size}, 0.0, 0.5, textColor, item.Text)
 return layout.Dimensions{Size: size}
 ```
 
@@ -99,10 +108,10 @@ centring in a computed cell a single call. From `iconbrowser/view.go` —
 for a caption centred under an icon:
 
 ```go
-textdraw.FillText(gtx, shaper, style.H6, image.Rectangle{Max: size}, 0.5, 0.5, p.Muted, notice)
+textdraw.FillText(gtx, t.typ.Shaper, t.typ.Notice, image.Rectangle{Max: size}, 0.5, 0.5, p.Muted, notice)
 
 captionRect := image.Rect(cell.Min.X, gtx.Dp(8)+iconPx+gtx.Dp(4), cell.Max.X, cellH)
-textdraw.FillText(gtx, shaper, Caption, captionRect, 0.5, 0.0, p.Text, IconTable[icon].Name)
+textdraw.FillText(gtx, t.typ.Shaper, t.typ.Caption, captionRect, 0.5, 0.0, p.Text, IconTable[icon].Name)
 ```
 
 When you do want a widget, `Text` is the same drawing wrapped for `layout` —
@@ -114,10 +123,14 @@ layout.UniformInset(12).Layout(gtx, textdraw.Text(shaper, style.H3, 0.0, 0.0, Gr
 layout.UniformInset(12).Layout(gtx, textdraw.Text(shaper, style.H4, 1.0, 1.0, Grey900, fmt.Sprint(fps, "fps")))
 ```
 
-The `*text.Shaper` is always the caller's. Build one per window at
-layer-building scope — from
-[`style.FontFaces()`](https://github.com/vibrantgio/style) — and pass it down;
-a shaper owns glyph caches and is not safe for concurrent use.
+The `*text.Shaper` is always the caller's. In a Vibrant Gio application that
+is the theme's — `Typography.Shaper()`, built once from the theme's faces and
+cached in the value — which is what the workbench snippets above pass as
+`typ.Shaper`. A program without a theme builds one per window at
+layer-building scope (the example programs use
+[`style.FontFaces()`](https://github.com/vibrantgio/style)) and passes it
+down; a self-built shaper owns glyph caches and is not safe for concurrent
+use.
 
 ## For coding assistants
 
@@ -134,15 +147,15 @@ typography, and the pitfalls that are not guessable:
 Honest about what does not work yet. Every number below was measured against
 the built module.
 
-- **`TextStyle` is superseded for typography, though this module is not.**
-  ADR-003 makes `Typography` a theme token carrying a full
-  `spectrum/tokens.TextStyle` per MD3 role. Once that lands, *this* `TextStyle`
-  is no longer the type anything in the design system should be styling text
-  with, and [style](https://github.com/vibrantgio/style) — its only in-org
-  library consumer — is frozen by the same ADR. The drawing functions keep
-  their job; F2.3 of the [org plan](https://github.com/vibrantgio/.github)
-  revisits this note once Phase C has shipped and the replacement surface is
-  known.
+- **`TextStyle` is superseded as a typography source, though this module is
+  not.** ADR-003's `Typography` theme token — a full
+  `spectrum/tokens.TextStyle` per MD3 role — is where type decisions live
+  now, so *this* `TextStyle` is a drawing parameter, not a place to define a
+  type system: applications convert a theme role into one at the call site
+  (`todos/theme.go` is the recipe) rather than declaring tables of them.
+  [style](https://github.com/vibrantgio/style), the one in-org library that
+  does declare such a table, is frozen and F3.4 (planned) archives it. The
+  drawing functions keep their job; nothing replaces them.
 - **`FillLabel` and `Label` have no consumer anywhere in the organization.**
   Not a module, not a demo, not a workbench application. They are the only two
   functions here that paint a background as well as glyphs, and nothing has
@@ -158,11 +171,12 @@ the built module.
   actually drew into, so a caller cannot learn how much space the label took.
   `FillText` returns nothing at all, by design — you already know the
   rectangle. `MeasureText` is how you find out.
-- **`End` and `Middle` are exported and unused; so are the locales.** There
-  are exactly fourteen `TextStyle` values in the whole organization —
-  [style](https://github.com/vibrantgio/style)'s scale, and nothing declares
-  another — and all fourteen set `Alignment: textdraw.Start`. Nothing anywhere
-  references `EN_US`, `NL`, `ZH_CN` or
+- **`End` and `Middle` are exported and unused; so are the locales.** Every
+  `TextStyle` declared or derived in the organization —
+  [style](https://github.com/vibrantgio/style)'s fourteen and the conversions
+  the workbench applications build from theme roles — sets
+  `Alignment: textdraw.Start`; alignment inside the rectangle is done with the
+  `ax` fraction instead. Nothing anywhere references `EN_US`, `NL`, `ZH_CN` or
   `Default` — `gtx.Locale` comes from the Gio window instead. The three locales
   are also all `system.LTR`, so the type has no RTL case to exercise, and no
   RTL text has ever been drawn through this module.
