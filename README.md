@@ -34,11 +34,11 @@ module still only ever sees the struct it defines.
 
 ## Where it sits
 
-Tier 0 of the stack — `mvu → theme → components → effects → cadence → markdown` —
+Tier 0 of the stack — `mvu → theme → components → effects → patterns → markdown` —
 a leaf that imports only Gio and `golang.org/x/image`. The
 [organization page](https://github.com/vibrantgio) has the full tier table.
 
-Nothing inside the design system imports it: components, effects, cadence and markdown
+Nothing inside the design system imports it: components, effects, patterns and markdown
 draw their own text through Gio's widget layer.
 [style](https://github.com/vibrantgio/style) imports it for its `TextStyle`
 table, and the callers are applications — a dozen example mains under
