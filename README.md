@@ -28,13 +28,13 @@ frozen [style](https://github.com/vibrantgio/style) module is a table of them,
 and the support repositories' example programs still draw with
 `textdraw.FillText(gtx, shaper, style.H6, …)`. The workbench applications
 instead derive theirs from the theme: a small per-app conversion turns a
-`spectrum/tokens.TextStyle` role into a `textdraw.TextStyle` (see
+`theme/tokens.TextStyle` role into a `textdraw.TextStyle` (see
 `todos/theme.go`), so the typeface and sizes arrive through the theme and this
 module still only ever sees the struct it defines.
 
 ## Where it sits
 
-Tier 0 of the stack — `mvu → spectrum → prism → pulse → cadence → markdown` —
+Tier 0 of the stack — `mvu → theme → prism → pulse → cadence → markdown` —
 a leaf that imports only Gio and `golang.org/x/image`. The
 [organization page](https://github.com/vibrantgio) has the full tier table.
 
@@ -149,7 +149,7 @@ the built module.
 
 - **`TextStyle` is superseded as a typography source, though this module is
   not.** ADR-003's `Typography` theme token — a full
-  `spectrum/tokens.TextStyle` per MD3 role — is where type decisions live
+  `theme/tokens.TextStyle` per MD3 role — is where type decisions live
   now, so *this* `TextStyle` is a drawing parameter, not a place to define a
   type system: applications convert a theme role into one at the call site
   (`todos/theme.go` is the recipe) rather than declaring tables of them.

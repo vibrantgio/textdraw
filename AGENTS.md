@@ -31,7 +31,7 @@ root.
     go build ./... && go test ./...
 
 **Superseded for typography, still live as a drawing primitive.** ADR-003
-moved the typeface into the theme: `spectrum/tokens.Typography` carries a full
+moved the typeface into the theme: `theme/tokens.Typography` carries a full
 `TextStyle` per MD3 role. Since it landed, this module's `TextStyle` is no
 longer the type anything in the design system should be styling text with —
 `style`, its only in-org library consumer, is frozen by the same ADR.
