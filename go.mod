@@ -3,7 +3,7 @@ module github.com/vibrantgio/textdraw
 go 1.25.1
 
 require (
-	gioui.org v0.10.1
+	gioui.org v0.10.2
 	golang.org/x/image v0.44.0
 )
 
