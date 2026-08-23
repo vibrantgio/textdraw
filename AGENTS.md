@@ -1,46 +1,8 @@
 # AGENTS.md — textdraw
 
-Text measurement and drawing straight onto a `*text.Shaper`, one level
-below Gio's widget layer: the `TextStyle` struct, `MeasureText`, `FillText`
-and `Text`, `FillLabel` and `Label`, and the alignment constants and
-locales they take.
+Text measurement and drawing one level below Gio's widget layer.
 
-**Layer.** Tier 0 of ADR-001's table — a leaf one level below Gio's widget
-layer, needing only Gio and `golang.org/x/image`. Its root module imports
-nothing else in the organization. That direction is measured rather than
-typed — `scripts/check-layers.sh --edges` reports the graph and
-`scripts/sync-agents.sh` renders these sentences from it — so correcting
-them here changes nothing. The other direction is measured too and
-deliberately not written down: the gate checks the graph both ways, but a
-public API's consumers are unknowable, so this file says what its module
-needs and never who needs it.
-
-**Read the canonical guide before you write code against this module.** It is
-the organization's one agent guide — the module inventory with current tags,
-the application skeleton, the MVU loop and rx semantics, typography, and the
-pitfalls that are not guessable. It lives exactly once, in `vibrantgio/workbench` —
-the repository that showcases building applications with Vibrant Gio —
-and this file links it rather than copying it:
+Read the org guide before you write code against this module:
 
     https://raw.githubusercontent.com/vibrantgio/workbench/master/llms.txt
 
-**Module.** `github.com/vibrantgio/textdraw`, one module at the repository
-root.
-
-**Build and test.** From the repository root:
-
-    go build ./... && go test ./...
-
-**Superseded for typography, still live as a drawing primitive.** ADR-003
-moved the typeface into the theme: `theme/tokens.Typography` carries a full
-`TextStyle` per MD3 role. Since it landed, this module's `TextStyle` is no
-longer the type anything in the design system should be styling text with, and
-the MD2 scale that used to carry it is frozen by the same ADR.
-
-Read that as a warning against new dependencies, not as a removal: ADR-003
-freezes `style` and says nothing about freezing `textdraw`. Phase C came and
-went without touching this module; `MeasureText`, `FillText` and `FillLabel`
-still have no replacement in the design system — they draw straight onto a
-`*text.Shaper`, below the widget layer, which is a thing the widget-level
-surfaces above cannot do at all. No phase has scheduled a replacement surface,
-so treat this module as staying rather than as waiting to be removed.
