@@ -13,7 +13,6 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
-// min returns the minimum of two integers.
 func min(l, r int) int {
 	if l < r {
 		return l
