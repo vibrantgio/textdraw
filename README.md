@@ -2,15 +2,15 @@
 
 Text measurement and drawing for [Vibrant Gio](https://github.com/vibrantgio),
 a design system for native desktop applications on macOS, Windows and Linux,
-written in pure Go on [Gio](https://gioui.org) — one level below the widget
+written in pure Go on [Gio](https://gioui.org) — one level below the component
 layer, straight onto a `*text.Shaper`.
 
-Gio's `widget/material.Label` is a widget: it takes the constraints it is
+Gio's `widget/material.Label` is a component: it takes the constraints it is
 given, lays itself out, and returns its dimensions. That is the right shape
 most of the time and the wrong one exactly when you are painting rather than
 composing — a caption centred in a grid cell you computed, a row whose height
 must not change when its text does, a pill of background colour sized to the
-words inside it. Doing any of those through the widget layer means laying the
+words inside it. Doing any of those through the component layer means laying the
 text out to find out how big it is, throwing that away, and laying it out again
 inside the box you then built.
 
@@ -20,7 +20,7 @@ string into an `image.Rectangle` you already decided on, at a fractional
 alignment within it — `(0, 0.5)` for left-and-vertically-centred, `(0.5, 0.5)`
 for dead centre — and returns nothing at all, because you already know where it
 went. `Text` and `Label` wrap the same code as `layout.Widget`s for the cases
-where you do want a widget.
+where you do want a component.
 
 The styling parameter is `TextStyle`: font, alignment, size in `unit.Sp`, line
 limit, truncator and wrap policy. Where the values come from has two eras. The
@@ -39,7 +39,7 @@ a leaf that imports only Gio and `golang.org/x/image`. The
 [organization page](https://github.com/vibrantgio) has the full tier table.
 
 Nothing inside the design system imports it: components, effects, patterns and markdown
-draw their own text through Gio's widget layer.
+draw their own text through Gio's component layer.
 [style](https://github.com/vibrantgio/style) imports it for its `TextStyle`
 table, and the callers are applications — a dozen example mains under
 `mvu/example`, `ivg/raster/gio/example`, `svg/driver/gio/example` and
@@ -114,7 +114,7 @@ captionRect := image.Rect(cell.Min.X, gtx.Dp(8)+iconPx+gtx.Dp(4), cell.Max.X, ce
 textdraw.FillText(gtx, t.typ.Shaper, t.typ.Caption, captionRect, 0.5, 0.0, p.Text, IconTable[icon].Name)
 ```
 
-When you do want a widget, `Text` is the same drawing wrapped for `layout` —
+When you do want a component, `Text` is the same drawing wrapped for `layout` —
 here from `traer/gio/gravity`, an overlay title and an FPS readout pinned to
 opposite corners by their alignment fractions alone:
 

@@ -1,6 +1,6 @@
 # AGENTS.md — textdraw
 
-Text measurement and drawing one level below Gio's widget layer.
+Text measurement and drawing one level below Gio's component layer.
 
 Read the org guide before you write code against this module:
 
