@@ -149,7 +149,7 @@ the built module.
 
 - **`TextStyle` is superseded as a typography source, though this module is
   not.** ADR-003's `Typography` theme token — a full
-  `theme/tokens.TextStyle` per MD3 role — is where type decisions live
+  `theme/tokens.TextStyle` per type role — is where type decisions live
   now, so *this* `TextStyle` is a drawing parameter, not a place to define a
   type system: applications convert a theme role into one at the call site
   (`todos/theme.go` is the recipe) rather than declaring tables of them.
