@@ -46,16 +46,13 @@ table, and the callers are applications — a dozen example mains under
 `traer/gio`, plus three of the seven applications built on the design
 system.
 
-**This module is not deprecated, and the fate of `style` does not touch it.**
-ADR-003 froze `style` — F3.4 of the
-[org plan](https://github.com/vibrantgio/.github) (planned) archives that
-repository at v0.0.6 — but says nothing about textdraw, which stays a live
-tier-0 module: no phase deprecates it, no phase deletes it, and `MeasureText`,
-`FillText` and `FillLabel` have no replacement anywhere in the design system —
-there is nothing else in the organization that measures a string or paints one
-into a rectangle you chose. The applications kept drawing through it
-when F1 moved them off `style`; only the source of their `TextStyle` values
-changed, from `style`'s table to the theme's Typography roles.
+**This module is not deprecated, and the freeze on `style` does not touch
+it.** textdraw is a live tier-0 module: no phase deprecates it, no phase
+deletes it, and `MeasureText`, `FillText` and `FillLabel` have no replacement
+anywhere in the design system — there is nothing else in the organization
+that measures a string or paints one into a rectangle you chose. The
+applications draw through it with `TextStyle` values taken from the theme's
+Typography roles.
 
 ```sh
 go get github.com/vibrantgio/textdraw
@@ -142,16 +139,14 @@ root's [`AGENTS.md`](https://github.com/vibrantgio/.github/blob/master/AGENTS.md
 Honest about what does not work yet. Every number below was measured against
 the built module.
 
-- **`TextStyle` is superseded as a typography source, though this module is
-  not.** ADR-003's `Typography` theme token — a full
-  `theme/tokens.TextStyle` per type role — is where type decisions live
-  now, so *this* `TextStyle` is a drawing parameter, not a place to define a
-  type system: applications convert a theme role into one at the call site
-  (an application's own `theme.go` is the recipe) rather than declaring
-  tables of them.
+- **`TextStyle` is a drawing parameter, not a typography source.** Type
+  decisions live in the `Typography` theme token — a full
+  `theme/tokens.TextStyle` per type role — so applications convert a theme
+  role into one of these at the call site (an application's own `theme.go` is
+  the recipe) rather than declaring tables of them.
   [style](https://github.com/vibrantgio/style), the one in-org library that
-  does declare such a table, is frozen and F3.4 (planned) archives it. The
-  drawing functions keep their job; nothing replaces them.
+  does declare such a table, is frozen and archived. The drawing functions
+  keep their job; nothing replaces them.
 - **`FillLabel` and `Label` have no consumer anywhere in the organization.**
   Not a module, not a demo, not an application. They are the only two
   functions here that paint a background as well as glyphs, and nothing has
