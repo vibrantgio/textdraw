@@ -9,7 +9,7 @@ Gio's `widget/material.Label` is a component: it takes the constraints it is
 given, lays itself out, and returns its dimensions. That is the right shape
 most of the time and the wrong one exactly when you are painting rather than
 composing — a caption centred in a grid cell you computed, a row whose height
-must not change when its text does, a rounded background sized to the
+must not change when its text does, a rounded fill sized to the
 text inside it. Doing any of those through the component layer means laying the
 text out to find out how big it is, throwing that away, and laying it out again
 inside the box you then built.
@@ -19,7 +19,7 @@ returns its size as an `image.Point`, drawing nothing. `FillText` paints a
 string into an `image.Rectangle` you already decided on, at a fractional
 alignment within it — `(0, 0.5)` for left-and-vertically-centred, `(0.5, 0.5)`
 for dead centre — and returns nothing at all, because you already know where it
-went. `Text` and `Label` wrap the same code as `layout.Widget`s for the cases
+went. `Text` and `TextOnRRect` wrap the same code as `layout.Widget`s for the cases
 where you do want a component.
 
 The styling parameter is `TextStyle`: font, alignment, size in `unit.Sp`, line
@@ -53,8 +53,8 @@ One package, at the module root.
 | `MeasureText` | Shapes a string and returns its size as an `image.Point`. Draws nothing, allocates no ops. |
 | `FillText` | Paints a string into an `image.Rectangle` at fractional alignment `(ax, ay)` within it. Returns nothing. |
 | `Text` | `FillText` as a `layout.Widget` over the incoming constraints, returning `Dimensions` with a computed `Baseline`. |
-| `FillLabel` | A rounded background in `fill` sized to the text, with the string drawn on it in `onFill`. The background tracks `ax` horizontally and is clamped inside the rectangle. |
-| `Label` | `FillLabel` as a `layout.Widget` over the incoming constraints. |
+| `FillTextOnRRect` | A rounded fill in `fill` sized to the text, with the string drawn on it in `foreground`. The fill tracks `ax` horizontally and is clamped inside the rectangle. |
+| `TextOnRRect` | `FillTextOnRRect` as a `layout.Widget` over the incoming constraints. |
 | `Start`, `End`, `Middle` | Aliases of the `gioui.org/text` alignment constants, so a caller needs one text import instead of two. |
 | `FontFace` | A type *alias* for `gioui.org/font.FontFace` — not a wrapper. A `[]textdraw.FontFace` drops straight into `text.WithCollection`. |
 | `EN_US`, `NL`, `ZH_CN`, `Default` | Prebuilt `system.Locale` values. All three are left-to-right; `Default` is `EN_US`. |
@@ -118,16 +118,16 @@ Honest about what does not work yet.
   `theme/tokens.TextStyle` per typography role — so applications convert a
   typography role into one of these at the call site rather than declaring
   tables of them.
-- **`FillLabel` can overflow its rectangle.** It and `Label` are the only two
-  functions here that paint a background as well as glyphs. The background's width
+- **`FillTextOnRRect` can overflow its rectangle.** It and `TextOnRRect` are the only two
+  functions here that paint a fill as well as glyphs. The fill's width
   is `textWidth + ⅔ × lineHeight`, and that padding is added *after* the text
-  was measured against the rectangle, so the background can be up to two-thirds of a
+  was measured against the rectangle, so the fill can be up to two-thirds of a
   line height wider than the rectangle it was told to stay inside. The two
-  clamps then fight: the first pushes the background left to fit the right edge, the second
+  clamps then fight: the first pushes the fill left to fit the right edge, the second
   pushes it back to the left edge, and it overflows on the right.
-- **`FillLabel` returns the wrong dimensions.** It returns
+- **`FillTextOnRRect` returns the wrong dimensions.** It returns
   `layout.Dimensions{Size: gtx.Constraints.Max}` regardless of the rectangle it
-  actually drew into, so a caller cannot learn how much space the background took.
+  actually drew into, so a caller cannot learn how much space the fill took.
   `FillText` returns nothing at all, by design — you already know the
   rectangle. `MeasureText` is how you find out.
 - **The locales are not used by the drawing functions, and none is
@@ -147,9 +147,9 @@ Honest about what does not work yet.
   Gio's shaper — it flags every line, including the last — but it means the
   measurement is line-quantised: a height is a whole number of lines, with
   nothing in between.
-- **`Text` reports a baseline; `Label` does not.** `Text` computes
+- **`Text` reports a baseline; `TextOnRRect` does not.** `Text` computes
   `Baseline: size.Y - firstLineBaseline`, so it composes correctly in a
-  baseline-aligned flex. `FillLabel` and `Label` return a zero `Baseline`.
+  baseline-aligned flex. `FillTextOnRRect` and `TextOnRRect` return a zero `Baseline`.
 - **There are no tests and no golden images.** `go test ./...` reports "no
   test files", so none of its output is pinned.
 

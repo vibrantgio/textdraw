@@ -10,7 +10,9 @@ import (
 	"gioui.org/text"
 )
 
-func FillLabel(gtx layout.Context, shaper *text.Shaper, style TextStyle, rect image.Rectangle, ax, ay float32, radius int, fill, onFill color.Color, str string) layout.Dimensions {
+// FillTextOnRRect paints str in foreground on a rounded fill sized to the text,
+// placed within rect at fractional alignment (ax, ay).
+func FillTextOnRRect(gtx layout.Context, shaper *text.Shaper, style TextStyle, rect image.Rectangle, ax, ay float32, radius int, fill, foreground color.Color, str string) layout.Dimensions {
 	gtx.Constraints.Max.X = min(gtx.Constraints.Max.X, rect.Dx())
 
 	textSize := MeasureText(gtx, shaper, style, str)
@@ -32,13 +34,15 @@ func FillLabel(gtx layout.Context, shaper *text.Shaper, style TextStyle, rect im
 	shape := clip.UniformRRect(textrect, radius).Op(gtx.Ops)
 	paint.FillShape(gtx.Ops, c, shape)
 
-	FillText(gtx, shaper, style, textrect, 0.5, ay, onFill, str)
+	FillText(gtx, shaper, style, textrect, 0.5, ay, foreground, str)
 
 	return layout.Dimensions{Size: gtx.Constraints.Max}
 }
 
-func Label(shaper *text.Shaper, style TextStyle, ax, ay float32, radius int, fill, onFill color.Color, str string) layout.Widget {
+// TextOnRRect is [FillTextOnRRect] as a layout.Widget over the incoming
+// constraints.
+func TextOnRRect(shaper *text.Shaper, style TextStyle, ax, ay float32, radius int, fill, foreground color.Color, str string) layout.Widget {
 	return func(gtx layout.Context) layout.Dimensions {
-		return FillLabel(gtx, shaper, style, image.Rectangle{Max: gtx.Constraints.Max}, ax, ay, radius, fill, onFill, str)
+		return FillTextOnRRect(gtx, shaper, style, image.Rectangle{Max: gtx.Constraints.Max}, ax, ay, radius, fill, foreground, str)
 	}
 }
