@@ -62,7 +62,7 @@ One package, at the module root.
 ## Usage
 
 Measure, then place, then draw. This sizes a clickable row to one line of
-its Title style — the theme's TitleLarge typography role converted to a
+its Title style — a theme type role such as Title3 converted to a
 `textdraw.TextStyle`, with the theme's cached shaper — and vertically centres
 the item's text in it:
 
